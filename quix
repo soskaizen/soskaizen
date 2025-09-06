@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Che Romano Sei? — Quiz in 40 secondi</title>
+<meta name="description" content="7 domande ironiche sullo stile di vita romano. Scopri che personaggio sei: Trasteverino, Pariolino, Pignetarolo o Ostiensense.">
+<!-- OG tags (facoltativi, puoi personalizzarli) -->
+<meta property="og:title" content="Che Romano Sei? — Quiz" />
+<meta property="og:description" content="7 domande ironiche sullo stile di vita romano. Risultato finale con profilo e immagine." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="" />
+
+<style>
+  :root{
+    --bg:#0b0c10; --ink:#f5f7fb; --mut:#b6bac5; --card:#151821; --bd:#232838; --acc:#ffd166;
+    --r:18px; --w:900px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink);
+       background: radial-gradient(1200px 800px at 20% -10%, #1a1f2a, transparent), var(--bg);}
+  .wrap{max-width:var(--w); margin:0 auto; padding:24px}
+  header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:4px 0 18px}
+  h1{font-size:clamp(22px,5vw,36px); margin:0}
+  .mut{color:var(--mut)}
+  .card{background:var(--card); border:1px solid var(--bd); border-radius:var(--r); padding:18px; box-shadow:0 12px 28px rgba(0,0,0,.35)}
+  .progress{height:10px; background:#0e1118; border:1px solid var(--bd); border-radius:99px; overflow:hidden; margin:8px 0 16px}
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,#ffd166,#ff9f1c); transition:width .2s ease}
+  .q{font-weight:700; margin:2px 0 10px; font-size:clamp(16px,3.6vw,20px)}
+  .grid{display:grid; gap:10px; grid-template-columns:1fr 1fr}
+  .btn{cursor:pointer; border:1px solid var(--bd); background:#0f1320; color:var(--ink); padding:12px 14px; border-radius:14px; text-align:left}
+  .btn:hover{background:#141a2b}
+  .cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+  .pill{border:1px solid var(--bd); padding:10px 12px; border-radius:999px; background:#0f1320; cursor:pointer}
+  .pill.acc{background:linear-gradient(180deg,#ffd166,#ffb703); color:#1c1604; border-color:#ffb703; font-weight:700}
+  .center{text-align:center}
+  footer{margin:22px 0 8px; font-size:12px; color:var(--mut); text-align:center}
+  /* risultato */
+  .result{display:grid; grid-template-columns:1fr; gap:14px}
+  .profile{display:grid; gap:14px; grid-template-columns:1fr}
+  .profile-head{display:flex; gap:14px; align-items:center}
+  .avatar{width:72px; height:72px; border-radius:16px; background:#0f1320; border:1px solid var(--bd); display:flex; align-items:center; justify-content:center}
+  .title{font-size:clamp(18px,4vw,28px); font-weight:800; margin:0}
+  .desc{color:var(--mut); line-height:1.55}
+  .share{display:flex; gap:10px; flex-wrap:wrap}
+  @media (max-width:680px){
+    .grid{grid-template-columns:1fr}
+    .profile{grid-template-columns:1fr}
+  }
+  /* mini badge step */
+  .step{font-size:12px; color:#cbd0dd; background:#0e1118; border:1px solid var(--bd);
+        display:inline-block; padding:6px 10px; border-radius:999px; margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Che Romano Sei?</h1>
+    <button id="restartTop" class="pill">Ricomincia</button>
+  </header>
+
+  <section id="quizCard" class="card">
+    <div class="step" id="stepBadge">Domanda 1 di 7</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="qText" class="q">...</div>
+    <div id="answers" class="grid"></div>
+    <div class="cta">
+      <button id="skip" class="pill">Salta (random)</button>
+    </div>
+  </section>
+
+  <section id="resultCard" class="card" style="display:none;">
+    <div class="result">
+      <div class="profile">
+        <div class="profile-head">
+          <div class="avatar" id="avatar" aria-hidden="true"></div>
+          <div>
+            <div class="title" id="titleProfile">Profilo</div>
+            <div class="mut" id="subtitle">Stile di vita romano · 7/7</div>
+          </div>
+        </div>
+        <div class="desc" id="desc">...</div>
+      </div>
+      <div class="share">
+        <button id="shareBtn" class="pill acc">Condividi risultato</button>
+        <button id="copyBtn" class="pill">Copia link</button>
+        <button id="restartBtn" class="pill">Rifai il quiz</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>© <span id="year"></span> — Quiz senza tracciamento, tutto in locale</footer>
+</div>
+
+<script>
+/* ======= DATI QUIZ ======= */
+const QUESTIONS = [
+  {
+    q: "È sabato sera: che fai?",
+    a: [
+      "Apericena che non finisce più",
+      "Birretta e concerto indie",
+      "Carbonara tardissima",
+      "Rave clandestino (forse)"
+    ]
+  },
+  {
+    q: "Caffè ideale?",
+    a: [
+      "Espresso secco in piedi",
+      "Moka a casa ‘che costa meno",
+      "Cappuccino anche alle 18 (bestemmia?)",
+      "Cold brew ‘che fa figo"
+    ]
+  },
+  {
+    q: "Look del giorno:",
+    a: [
+      "Camicia bianca e mocassino",
+      "Vintage di mercatino",
+      "Tuta e Nike pulite",
+      "Total black e anello d’argento"
+    ]
+  },
+  {
+    q: "Traffico sul Lungotevere...",
+    a: [
+      "Taxi subito, ciao",
+      "Monopattino e via",
+      "Bus? Spingiamo",
+      "A piedi, che è tutto vicino (non è vero)"
+    ]
+  },
+  {
+    q: "Pranzo della domenica:",
+    a: [
+      "Osteria storica con i parenti",
+      "Street food e passeggiata",
+      "Supplì + birretta",
+      "Veg brunch con foto"
+    ]
+  },
+  {
+    q: "Colonna sonora tipica:",
+    a: [
+      "Cantautori italiani",
+      "Indie/alt rock",
+      "Trap one shot",
+      "Techno deep & dark"
+    ]
+  },
+  {
+    q: "Frase che dici più spesso:",
+    a: [
+      "‘Namo su",
+      "Se famo un giro?",
+      "Aò ma che sei serio?",
+      "Ci vediamo dopo, forse"
+    ]
+  }
+];
+
+const PROFILES = [
+  {
+    id: "trasteverino",
+    name: "Il Trasteverino",
+    svg: `<svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect rx="12" ry="12" x="4" y="4" width="56" height="56" fill="#FFB703"/>
+            <path d="M22 36c0-6 4-10 10-10s10 4 10 10v10H22V36z" fill="#2F2F2F"/>
+            <circle cx="32" cy="24" r="6" fill="#2F2F2F"/>
+            <path d="M16 48h32" stroke="#2F2F2F" stroke-width="3" stroke-linecap="round"/>
+          </svg>`,
+    desc: "Social, caloroso, sempre tra vicoli, vino rosso e amici nuovi ogni sera. Ti piace perdere tempo bene."
+  },
+  {
+    id: "pariolino",
+    name: "Il Pariolino",
+    svg: `<svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect rx="12" ry="12" x="4" y="4" width="56" height="56" fill="#90E0EF"/>
+            <path d="M20 44c0-8 5-14 12-14s12 6 12 14v4H20v-4z" fill="#1f1f1f"/>
+            <circle cx="32" cy="22" r="7" fill="#1f1f1f"/>
+            <path d="M18 50h28" stroke="#1f1f1f" stroke-width="3" stroke-linecap="round"/>
+          </svg>`,
+    desc: "Chic, ordinato, cocktail giusto e locali eleganti. Ami il comfort e la qualità, anche quando non serve."
+  },
+  {
+    id: "pignetarolo",
+    name: "Il Pignetarolo",
+    svg: `<svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect rx="12" ry="12" x="4" y="4" width="56" height="56" fill="#FF6B6B"/>
+            <path d="M18 40c0-7 6-12 14-12s14 5 14 12v8H18v-8z" fill="#111"/>
+            <circle cx="32" cy="20" r="8" fill="#111"/>
+            <path d="M16 50h32" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+          </svg>`,
+    desc: "Creativo, alternativo, mercatini, concertini e amici musicisti. Se è indipendente, ti piace."
+  },
+  {
+    id: "ostiensense",
+    name: "L’Ostiensense",
+    svg: `<svg viewBox="0 0 64 64" width="48" height="48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect rx="12" ry="12" x="4" y="4" width="56" height="56" fill="#A3F7B5"/>
+            <path d="M20 42c0-9 5-15 12-15s12 6 12 15v6H20v-6z" fill="#0e0e0e"/>
+            <circle cx="32" cy="20" r="7" fill="#0e0e0e"/>
+            <path d="M18 52h28" stroke="#0e0e0e" stroke-width="3" stroke-linecap="round"/>
+          </svg>`,
+    desc: "Clubbing, street art, capannoni e ponti d’acciaio. Notte lunga, mattina lenta. Industrial nel cuore."
+  }
+];
+
+/* ======= LOGICA QUIZ (risultato casuale) ======= */
+let step = 0;
+const picks = [];
+const qText = document.getElementById('qText');
+const answers = document.getElementById('answers');
+const bar = document.getElementById('bar');
+const stepBadge = document.getElementById('stepBadge');
+
+function renderQuestion(){
+  const total = QUESTIONS.length;
+  stepBadge.textContent = `Domanda ${step+1} di ${total}`;
+  bar.style.width = `${Math.round((step)/total*100)}%`;
+  const q = QUESTIONS[step];
+  qText.textContent = q.q;
+  answers.innerHTML = '';
+  q.a.forEach((txt, idx)=>{
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = txt;
+    b.onclick = () => { picks.push(idx); next(); };
+    answers.appendChild(b);
+  });
+}
+
+function next(){
+  step++;
+  if(step < QUESTIONS.length){
+    renderQuestion();
+  } else {
+    bar.style.width = '100%';
+    showResult();
+  }
+}
+
+/* ======= RISULTATO ======= */
+const quizCard = document.getElementById('quizCard');
+const resultCard = document.getElementById('resultCard');
+const restartBtn = document.getElementById('restartBtn');
+const restartTop = document.getElementById('restartTop');
+const shareBtn = document.getElementById('shareBtn');
+const copyBtn = document.getElementById('copyBtn');
+
+function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function showResult(){
+  // risultato casuale tra i 4 profili
+  const prof = randomItem(PROFILES);
+  // riempi i campi
+  document.getElementById('avatar').innerHTML = prof.svg;
+  document.getElementById('titleProfile').textContent = prof.name;
+  document.getElementById('desc').textContent = prof.desc;
+  document.getElementById('subtitle').textContent = "Stile di vita romano · 7/7";
+  // mostra sezione risultato
+  quizCard.style.display = 'none';
+  resultCard.style.display = 'block';
+  // pulisci picks (non strettamente necessario)
+  try { localStorage.setItem('lastProfile', prof.id); } catch(e){}
+  // aggiorna URL con ancora (non ricarica)
+  const url = new URL(location.href);
+  url.hash = `#${prof.id}`;
+  history.replaceState(null, '', url.toString());
+}
+
+/* ======= CONDIVISIONE / LINK ======= */
+async function shareResult(){
+  const title = document.getElementById('titleProfile').textContent;
+  const url = location.href;
+  const text = `Ho fatto il quiz "Che Romano Sei?" → ${title}`;
+  try{
+    if(navigator.share){
+      await navigator.share({title, text, url});
+    }else if(navigator.clipboard){
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert('Link copiato negli appunti!');
+    }else{
+      alert('Copia il link dalla barra indirizzi.');
+    }
+  }catch(e){
+    // utente ha annullato: ignora
+  }
+}
+async function copyLink(){
+  try{
+    await navigator.clipboard.writeText(location.href);
+    alert('Link copiato!');
+  }catch{
+    alert('Copia manualmente il link dalla barra indirizzi.');
+  }
+}
+
+/* ======= RESTART ======= */
+function restart(){
+  step = 0; picks.length = 0;
+  resultCard.style.display = 'none';
+  quizCard.style.display = 'block';
+  history.replaceState(null,'',location.pathname);
+  renderQuestion();
+}
+
+/* ======= INIT ======= */
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('skip').onclick = ()=>{ picks.push(Math.floor(Math.random()*4)); next(); };
+restartBtn.onclick = restart;
+restartTop.onclick = restart;
+shareBtn.onclick = shareResult;
+copyBtn.onclick = copyLink;
+
+renderQuestion();
+</script>
+</body>
+</html>
