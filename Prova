@@ -25,12 +25,7 @@
 <body>
   <div class="container">
     <h1>🤔 Quanti anni sembri DAVVERO?</h1>
-    <div id="quiz">
-      <div class="question">1. A che ora vai a dormire?</div>
-      <button onclick="nextQuestion(0)">Prima di mezzanotte</button>
-      <button onclick="nextQuestion(1)">Verso le 2</button>
-      <button onclick="nextQuestion(2)">Non dormo mai 😂</button>
-    </div>
+    <div id="quiz"></div>
     <div id="result" class="result"></div>
     <div id="after" style="display:none;">
       <div class="premium">
@@ -56,21 +51,78 @@
   </div>
 
   <script>
-    const results = [
-      "👶 Baby Face! Sembri 18 anni",
-      "🌟 Golden Vibes! Sembri 25 anni",
-      "🕶️ Mister Adulting! Sembri 30+"
+    // Domande e opzioni, ogni risposta ha un punteggio
+    const questions = [
+      {
+        text: "A che ora vai a dormire?",
+        options: [
+          { answer: "Prima di mezzanotte", score: 0 },
+          { answer: "Verso le 2", score: 1 },
+          { answer: "Non dormo mai 😂", score: 2 }
+        ]
+      },
+      {
+        text: "Cosa fai la mattina appena svegli?",
+        options: [
+          { answer: "Colazione sana e acqua", score: 0 },
+          { answer: "Controllo il telefono", score: 1 },
+          { answer: "Torno a dormire", score: 2 }
+        ]
+      },
+      {
+        text: "Come trascorri il weekend?",
+        options: [
+          { answer: "Sport e aria aperta", score: 0 },
+          { answer: "Netflix & relax", score: 1 },
+          { answer: "Festa tutta la notte!", score: 2 }
+        ]
+      }
     ];
+
+    // Risultati personalizzati in base al punteggio
+    const results = [
+      { badge: "👶", text: "Baby Face! Sembri 18 anni" },
+      { badge: "🌟", text: "Golden Vibes! Sembri 25 anni" },
+      { badge: "🕶️", text: "Mister Adulting! Sembri 30+" }
+    ];
+
+    let currentQuestion = 0;
+    let totalScore = 0;
     let finalResult = "";
-    function nextQuestion(choice) {
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("result").style.display = "block";
-      document.getElementById("after").style.display = "block";
-      finalResult = results[choice];
-      document.getElementById("result").innerHTML = `<div class="badge">${finalResult.split(" ")[0]}</div> ${finalResult}`;
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      let html = `<div class=\"question\">${currentQuestion + 1}. ${q.text}</div>`;
+      q.options.forEach((opt, idx) => {
+        html += `<button onclick=\"choose(${idx})\">${opt.answer}</button>`;
+      });
+      document.getElementById("quiz").innerHTML = html;
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("after").style.display = "none";
     }
 
-    // Mock share functions (funzionano già con WhatsApp, le altre richiedono API/deep link)
+    function choose(idx) {
+      totalScore += questions[currentQuestion].options[idx].score;
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quiz").style.display = "none";
+      let resIdx = totalScore <= 2 ? 0 : totalScore <= 4 ? 1 : 2;
+      let result = results[resIdx];
+      finalResult = result.badge + ' ' + result.text;
+      document.getElementById("result").innerHTML = `<div class=\"badge\">${result.badge}</div> ${result.text}`;
+      document.getElementById("result").style.display = "block";
+      document.getElementById("after").style.display = "block";
+    }
+
+    // Mock share functions (WhatsApp OK, le altre sono placeholder)
     function shareWA() {
       window.open(`https://wa.me/?text=Ho fatto il test e il risultato è: ${finalResult} 👉 prova anche tu!`, "_blank");
     }
@@ -80,6 +132,9 @@
     function shareTikTok() {
       alert("Per TikTok si può generare un'immagine/video scaricabile e postarlo.");
     }
+
+    // Avvia quiz
+    showQuestion();
   </script>
 </body>
 </html>
