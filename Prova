@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quanti anni sembri davvero?</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; text-align: center; background: #fff; margin: 0; }
+    .container { max-width: 480px; margin: auto; padding: 20px; }
+    h1 { font-size: 24px; color: #222; }
+    .question { margin: 20px 0; font-size: 18px; }
+    button { display: block; width: 100%; margin: 10px 0; padding: 14px; border: none; border-radius: 10px;
+             background: linear-gradient(45deg, #6c63ff, #ff4d8d); color: white; font-size: 16px; cursor: pointer; font-weight: bold; }
+    button:hover { opacity: 0.9; }
+    .result { display: none; margin-top: 25px; font-size: 22px; font-weight: bold; }
+    .badge { font-size: 48px; margin-bottom: 15px; }
+    .premium, .email { margin-top: 25px; padding: 15px; background: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+    input[type=email] { padding: 12px; width: 85%; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+    .share { margin-top: 25px; }
+    .share button { background: #25d366; } /* WhatsApp green */
+    .share .insta { background: #E1306C; } /* Instagram pink */
+    .share .tiktok { background: #010101; } /* TikTok black */
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤔 Quanti anni sembri DAVVERO?</h1>
+    <div id="quiz">
+      <div class="question">1. A che ora vai a dormire?</div>
+      <button onclick="nextQuestion(0)">Prima di mezzanotte</button>
+      <button onclick="nextQuestion(1)">Verso le 2</button>
+      <button onclick="nextQuestion(2)">Non dormo mai 😂</button>
+    </div>
+    <div id="result" class="result"></div>
+    <div id="after" style="display:none;">
+      <div class="premium">
+        🔓 Vuoi il profilo completo? <br>
+        <strong>Solo 4,99€</strong> 👉 <button> Sblocca ora </button>
+      </div>
+      <div class="email">
+        📩 Vuoi altri test virali gratis?<br>
+        Inserisci la tua email:
+        <br><input type="email" placeholder="La tua email">
+        <br><button>Iscriviti</button>
+      </div>
+      <div class="share">
+        <p>Condividi il tuo risultato 👇</p>
+        <button class="insta" onclick="shareInsta()">📸 Instagram Stories</button>
+        <button class="tiktok" onclick="shareTikTok()">🎶 TikTok</button>
+        <button onclick="shareWA()">💬 WhatsApp</button>
+      </div>
+      <div class="ads">
+        <p style="margin-top:30px; font-size:14px; color:#888;">[Spazio pubblicitario]</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const results = [
+      "👶 Baby Face! Sembri 18 anni",
+      "🌟 Golden Vibes! Sembri 25 anni",
+      "🕶️ Mister Adulting! Sembri 30+"
+    ];
+    let finalResult = "";
+    function nextQuestion(choice) {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("result").style.display = "block";
+      document.getElementById("after").style.display = "block";
+      finalResult = results[choice];
+      document.getElementById("result").innerHTML = `<div class="badge">${finalResult.split(" ")[0]}</div> ${finalResult}`;
+    }
+
+    // Mock share functions (funzionano già con WhatsApp, le altre richiedono API/deep link)
+    function shareWA() {
+      window.open(`https://wa.me/?text=Ho fatto il test e il risultato è: ${finalResult} 👉 prova anche tu!`, "_blank");
+    }
+    function shareInsta() {
+      alert("Per Instagram puoi generare un'immagine del risultato e caricarla come story.");
+    }
+    function shareTikTok() {
+      alert("Per TikTok si può generare un'immagine/video scaricabile e postarlo.");
+    }
+  </script>
+</body>
+</html>
